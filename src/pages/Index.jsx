@@ -2,7 +2,12 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import ReactFlow, { Background, Controls } from 'reactflow';
+import ReactFlow, { 
+  Background, 
+  Controls, 
+  applyNodeChanges, 
+  applyEdgeChanges 
+} from 'reactflow';
 import 'reactflow/dist/style.css';
 import { convertCodeToFlowchart } from "../utils/codeToFlowchart";
 
