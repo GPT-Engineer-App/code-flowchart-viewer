@@ -1,19 +1,44 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ReactFlow, { 
+  Background, 
+  Controls, 
+  applyNodeChanges, 
+  applyEdgeChanges 
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { convertCodeToFlowchart } from "../utils/codeToFlowchart";
 
 const Index = () => {
   const [code, setCode] = useState("");
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setCode(e.target.result);
+      reader.onload = (e) => {
+        const uploadedCode = e.target.result;
+        setCode(uploadedCode);
+        const { nodes, edges } = convertCodeToFlowchart(uploadedCode);
+        setNodes(nodes);
+        setEdges(edges);
+      };
       reader.readAsText(file);
     }
   };
+
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    [setNodes]
+  );
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
 
   return (
     <div className="container mx-auto p-4">
@@ -39,8 +64,17 @@ const Index = () => {
         </div>
         <div>
           <h2 className="text-xl font-semibold mb-2">Flowchart</h2>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg h-[400px] flex items-center justify-center">
-            <p className="text-gray-500">Flowchart will be displayed here</p>
+          <div style={{ width: '100%', height: '400px' }}>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              fitView
+            >
+              <Background />
+              <Controls />
+            </ReactFlow>
           </div>
         </div>
       </div>
