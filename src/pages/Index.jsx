@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,8 @@ const Index = () => {
   const [code, setCode] = useState("");
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [selectedRange, setSelectedRange] = useState(null);
+  const textareaRef = useRef(null);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -40,6 +42,26 @@ const Index = () => {
     [setEdges]
   );
 
+  const handleCodeSelection = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      setSelectedRange({ start, end });
+
+      // Highlight corresponding nodes
+      const selectedLines = code.slice(start, end).split('\n').length;
+      const newNodes = nodes.map((node, index) => ({
+        ...node,
+        style: {
+          ...node.style,
+          background: index < selectedLines ? '#ffd700' : '#f0f0f0',
+        },
+      }));
+      setNodes(newNodes);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Code to Flowchart</h1>
@@ -57,8 +79,10 @@ const Index = () => {
         <div>
           <h2 className="text-xl font-semibold mb-2">Uploaded Code</h2>
           <Textarea
+            ref={textareaRef}
             value={code}
-            readOnly
+            onChange={(e) => setCode(e.target.value)}
+            onSelect={handleCodeSelection}
             className="w-full h-[400px] font-mono text-sm"
           />
         </div>
